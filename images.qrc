@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="led_off">led_off.png</file>
+        <file alias="led_on">led_on.png</file>
+        <file alias="lock_closed">lock_closed.png</file>
+        <file alias="lock_open">lock_open.png</file>
+    </qresource>
+</RCC>

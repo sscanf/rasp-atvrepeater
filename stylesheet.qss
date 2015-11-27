@@ -1,0 +1,13 @@
+body {
+    background-image: none;
+    background: rgb(180,180,180);
+    color: black;
+}
+
+QGroupBox {
+    color: white;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgb(52, 116, 116), stop:1 rgb(59, 57, 60));
+    border: 2px solid rgb(180, 180, 180);
+    border-radius: 7px;
+    padding-top: 1.5em;
+}

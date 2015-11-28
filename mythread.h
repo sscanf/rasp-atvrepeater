@@ -56,6 +56,7 @@ public:
     void    clearRele     (mythread::reles rel);
     quint8  getRelesStatus();
     void    setAllReles   (quint8 reles);
+    bool    getSignalIn   ();
 
 private:
     int     getSample   (mythread::adc_channel chan);
@@ -69,6 +70,7 @@ private:
     QList <int>     m_bReles;
     QMap <int, int> m_mapReles;
     quint8          m_statusReles;
+    bool            m_bSignalIn;
 
 signals:
     void temperature (float);

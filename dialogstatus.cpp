@@ -22,7 +22,7 @@ DialogStatus::DialogStatus(quint8 releStatus, QWidget *parent) :
     ui->groupBox_2->setStyleSheet("background-color: gray; color: white; font-size: 24px");
     ui->groupBox_3->setStyleSheet("background-color: gray; color: white; font-size: 24px");
 
-   ui->rele1->setSkin("BerylSquare");
+    ui->rele1->setSkin("BerylSquare");
     ui->rele2->setSkin("BerylSquare");
     ui->rele3->setSkin("BerylSquare");
     ui->rele4->setSkin("BerylSquare");
@@ -139,10 +139,10 @@ void DialogStatus::setTemperature (float temp)
 void DialogStatus::setWats (float wats)
 {
     ui->potencia->setValue(wats);
-
+/*
     QString str;
     str.sprintf ("%02.1f",wats);
-    ui->label_wats->setText (str);
+    ui->label_wats->setText (str);*/
 }
 
 void DialogStatus::setRele (quint8 rele, bool bStatus)

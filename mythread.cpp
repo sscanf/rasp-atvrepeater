@@ -138,6 +138,10 @@ int mythread::getSample(mythread::adc_channel chan)
     return sample;
 }
 
+bool mythread::getSignalIn()
+{
+    return m_bSignalIn;
+}
 
 quint8 mythread ::getTone ()
 {
@@ -229,15 +233,15 @@ void mythread ::run()
             }
         }
 
-        bool bSignalIn = m_gpio.bitValue(SIGNAL_IN);
+        m_bSignalIn = m_gpio.bitValue(SIGNAL_IN);
 
-        if (bSignalIn && bSended==false)
+        if (m_bSignalIn && bSended==false)
         {
             emit signalIn (true);
             bSended=true;
         }
 
-        if (!bSignalIn && bSended==true)
+        if (!m_bSignalIn && bSended==true)
         {
             emit signalIn (false);
             bSended=false;

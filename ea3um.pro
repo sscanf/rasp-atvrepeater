@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     mythread.cpp \
     dialogstatus.cpp \
     tonein.cpp \
-    changepasswd.cpp
+    changepasswd.cpp \
+    smeter.cpp
 
 HEADERS  += mainwindow.h \
     banner.h \
@@ -33,12 +34,14 @@ HEADERS  += mainwindow.h \
     mythread.h \
     dialogstatus.h \
     tonein.h \
-    changepasswd.h
+    changepasswd.h \
+    smeter.h
 
 FORMS    += mainwindow.ui \
     dialogstatus.ui \
     tonein.ui \
-    changepasswd.ui
+    changepasswd.ui \
+    smeter.ui
 
 
 linux-* {

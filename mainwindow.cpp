@@ -72,12 +72,15 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pTimerSrvce = new QTimer ();
     connect (m_pTimerSrvce,SIGNAL (timeout()),this,SLOT (on_srvce()));
 
+    m_pTimerSMeter = new QTimer();
+    connect (m_pTimerSMeter,SIGNAL (timeout()),this, SLOT (on_TimerSMeter()));
+
     m_pThread = new mythread (this);
     connect (m_pThread,SIGNAL (tone(quint8)),       this,SLOT   (on_tone        (quint8)));
     connect (m_pThread,SIGNAL (temperature(float)), this,SLOT   (on_temperature (float)));
     connect (m_pThread,SIGNAL (wats(float)),        this,SLOT   (on_wats        (float)));
     connect (m_pThread,SIGNAL (rele(quint8,bool)),  this,SLOT   (on_rele (quint8, bool)));
-    connect (m_pThread,SIGNAL (signalIn(bool)),     this,SLOT   (on_signalIn      (bool)));
+//    connect (m_pThread,SIGNAL (signalIn(bool)),     this,SLOT   (on_signalIn      (bool)));
 
     m_pThread->start();//(QThread::HighestPriority);
     setBannerText();
@@ -131,15 +134,6 @@ void MainWindow::on_timeout()
     ui->label->hide();
 }
 
-
-void MainWindow::on_signalIn(bool bSignal)
-{
-    if (m_pDialogStatus)
-    {
-        m_pDialogStatus->setSignalIn(bSignal);
-    }
-}
-
 void MainWindow::on_rele (quint8 rel, bool bStatus)
 {
     if (m_pDialogStatus)
@@ -156,7 +150,6 @@ void MainWindow::on_tone (quint8 tone)
     {
         case MainWindow::iddle:
             m_code.append ((tone%0x0a)+'0');
-            qDebug() << m_code;
             secret.fill('*',m_code.length());
             m_pToneIn->setNumber(secret);
 
@@ -164,8 +157,7 @@ void MainWindow::on_tone (quint8 tone)
             {
                 QString passwd(m_code);
 
-                if (passwd==m_passwd)
-                {
+                if (passwd==m_passwd){
                     m_pTimer->stop();
                     ui->label->setText ("SVCE");
                     ui->label->show();
@@ -175,9 +167,14 @@ void MainWindow::on_tone (quint8 tone)
                     m_code.clear();
                     m_pToneIn->setNumber("");
                 }
+                else if (passwd == "1234"){
+                    if (!m_pSMeter)
+                        showSMeterDlg(true);
+                    else
+                        showSMeterDlg(false);
+                }
                 on_timercode();
             }
-
         break;
 
         case MainWindow::service:
@@ -208,13 +205,16 @@ void MainWindow::on_tone (quint8 tone)
                 {
                     if (m_code.at(1)==1)    //Bloqueado
                     {
-                        m_pDialogStatus->setLock(true);
+                        if (m_pDialogStatus)
+                            m_pDialogStatus->setLock(true);
+
                         m_pTimerSrvce->stop();
                     }
 
                     if (m_code.at(1)==0x0a) //Desbloqueado
                     {
-                        m_pDialogStatus->setLock(false);
+                        if (m_pDialogStatus)
+                            m_pDialogStatus->setLock(false);
                         m_pTimerSrvce->start (TIMEOUT_SERVICE);
                     }
 
@@ -223,12 +223,14 @@ void MainWindow::on_tone (quint8 tone)
 
                         if (m_bAutomatico)
                         {
-                            m_pDialogStatus->setManual(true);
+                            if (m_pDialogStatus)
+                                m_pDialogStatus->setManual(true);
                             m_bAutomatico=false;
                         }
                         else
                         {
-                            m_pDialogStatus->setManual(false);
+                            if (m_pDialogStatus)
+                                m_pDialogStatus->setManual(false);
                             m_bAutomatico=true;
                         }
                     }
@@ -239,29 +241,21 @@ void MainWindow::on_tone (quint8 tone)
                     if (m_code.at(1)==1)
                     {
                         if (!m_pDialogStatus)
-                        {
                             showStatusDlg(true);
-                        }
                     }
 
                     if (m_code.at(1)==0x0a)
-                    {
                         showStatusDlg(false);
-                    }
                 }
                 else
                 {
                     if (m_code.at(0)<7)
                     {
                         if (m_code.at(1)==1)
-                        {
                             m_pThread->setRele ((mythread::reles)m_bReles[m_code.at(0)-1]);
-                        }
 
                         if (m_code.at(1)==0x0a)
-                        {
                             m_pThread->clearRele((mythread::reles)m_bReles[m_code.at(0)-1]);
-                        }
                     }
                 }
 
@@ -396,6 +390,40 @@ void MainWindow::showChangePasswd(bool bShow)
     }
 }
 
+void MainWindow::on_signalIn(bool bSignal)
+{
+    if (m_pDialogStatus)
+        m_pDialogStatus->setSignalIn(bSignal);
+}
+
+void MainWindow::on_TimerSMeter()
+{
+    if (m_wats>0.2)
+        m_pTimerSMeter->start (TIMEOUT_SMETER);
+    else
+        showSMeterDlg(false);
+}
+
+void MainWindow::showSMeterDlg(bool bShow)
+{
+    if (bShow){
+        m_pThread->setRele (mythread::rele3);
+        m_pSMeter = new SMeter (this);
+        m_pSMeter->setStyleSheet("background-image: none;  "\
+                                 "background: rgb(180,180,180);" \
+                                 "color: black;");
+        m_pSMeter->showFullScreen();
+        m_pToneIn->setParent (m_pSMeter);
+        m_pTimerSMeter->start (TIMEOUT_SMETER);
+    }
+    else{
+        m_pThread->clearRele(mythread::rele3);
+        m_pSMeter->deleteLater();
+        m_pToneIn->setParent(this);
+        m_pTimerSMeter->stop();
+    }
+}
+
 void MainWindow::showStatusDlg(bool bShow)
 {
     if (bShow)
@@ -437,9 +465,21 @@ void MainWindow::on_timercode()
 
 void MainWindow::on_wats(float wats)
 {
-    if (m_pDialogStatus)
+    if (m_pDialogStatus){
         m_pDialogStatus->setWats(wats);
+
+        if (wats<0.05)
+            m_pDialogStatus->setSignalIn(false);
+        else
+            m_pDialogStatus->setSignalIn(true);
+
+    }
+
+    if (m_pSMeter)
+        m_pSMeter->setWats(wats);
     m_wats = wats;
+
+
     setBannerText();
 }
 

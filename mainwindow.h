@@ -11,8 +11,10 @@
 #include "dialogstatus.h"
 #include "tonein.h"
 #include "changepasswd.h"
+#include "smeter.h"
 
 #define TIMEOUT_SERVICE     50000
+#define TIMEOUT_SMETER      30*60*1000
 
 #define TECLA_ALMOHADILLA   0x0c
 #define TECLA_ASTERISCO     0x0b
@@ -44,6 +46,7 @@ private:
     QTimer             *m_pRequestTimer;
     QTimer             *m_pTimerCode;
     QTimer             *m_pTimerSrvce;
+    QTimer             *m_pTimerSMeter;
     mythread           *m_pThread;
     MainWindow::status  m_currentStatus;
     QByteArray          m_code;    
@@ -63,9 +66,12 @@ private:
 
     QPointer <changePasswd> m_pChangePasswd;
     QPointer <DialogStatus> m_pDialogStatus;
+    QPointer <SMeter>       m_pSMeter;
+
 
 
 private:
+    void showSMeterDlg(bool bShow);
     void showStatusDlg(bool bShow);
     void showChangePasswd(bool bShow);
     void setBannerText();
@@ -80,6 +86,7 @@ public slots:
     void on_wats(float);
     void on_rele(quint8, bool);
     void on_signalIn (bool);
+    void on_TimerSMeter();
 };
 
 

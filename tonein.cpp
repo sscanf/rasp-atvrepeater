@@ -24,4 +24,3 @@ void tonein::setNumber(QString number)
 {
     ui->label->setText (number);
 }
-
